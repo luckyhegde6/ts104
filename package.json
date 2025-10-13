@@ -1,0 +1,42 @@
+{
+  "name": "ts104",
+  "version": "0.1.0",
+  "description": "Generics &amp; Advanced Types  Topics: Generic functions, constraints, mapped types Mini Project: “Generic Data Store”  Build a lightweight in-memory DB class using generics.  Store any entity type with full type safety.",
+  "directories": {
+    "example": "examples",
+    "test": "tests",
+    "doc": "docs"
+  },
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "jest --coverage",
+    "type-test": "tsd",
+    "lint": "eslint ./src --ext .ts",
+    "prettier": "prettier --check ."
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.10",
+    "eslint": "^8.57.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.3.3",
+    "ts-jest": "^29.2.3",
+    "ts-node": "^10.9.2",
+    "tsd": "^0.30.0",
+    "typescript": "^5.6.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luckyhegde6/ts104.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/luckyhegde6/ts104/issues"
+  },
+  "homepage": "https://github.com/luckyhegde6/ts104#readme"
+}
