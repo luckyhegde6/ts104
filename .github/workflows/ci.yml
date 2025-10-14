@@ -15,7 +15,7 @@ jobs:
   build-test:
     runs-on: ubuntu-latest
     outputs:
-      coverage-folder: coverage
+      coverage-path: coverage
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -32,23 +32,17 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: TypeScript Build
+      - name: TypeScript build
         run: npm run build
 
-      - name: Run Jest Tests
-        run: npm test
+      - name: Run Jest tests with coverage
+        run: npm test -- --coverage
 
-      - name: Generate coverage report and badge
-        uses: cicirello/jest-coverage-report-action@v4
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          output: both
-
-      - name: Upload coverage folder
+      - name: Upload coverage artifact
         uses: actions/upload-artifact@v4
         with:
           name: coverage-html
-          path: coverage/
+          path: coverage/lcov-report
 
   publish-coverage:
     runs-on: ubuntu-latest
@@ -63,13 +57,8 @@ jobs:
           name: coverage-html
           path: coverage/
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload coverage to GitHub Pages
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy coverage to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
-          path: coverage/
-
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v4
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./coverage
