@@ -16,7 +16,7 @@ export type Update<T, K extends keyof T = DefaultKey<T>> = Partial<Omit<T, K>>;
  * Pagination and sorting options
  */
 export type SortDirection = 'asc' | 'desc';
-export type QueryOptions<T = any> = {
+export type QueryOptions<T = unknown> = {
   limit?: number;
   offset?: number;
   sortBy?: keyof T;
@@ -29,27 +29,32 @@ export type QueryOptions<T = any> = {
  */
 export type Primitive = string | number | boolean | Date;
 
-export type FieldFilter<V> =
-  V extends string ? {
-    eq?: V;
-    contains?: string;
-    startsWith?: string;
-    endsWith?: string;
-  } : V extends number ? {
-    eq?: V;
-    lt?: V;
-    lte?: V;
-    gt?: V;
-    gte?: V;
-    between?: [V, V];
-  } : V extends Date ? {
-    eq?: V;
-    before?: V;
-    after?: V;
-    between?: [V, V];
-  } : {
-    eq?: V;
-  };
+export type FieldFilter<V> = V extends string
+  ? {
+      eq?: V;
+      contains?: string;
+      startsWith?: string;
+      endsWith?: string;
+    }
+  : V extends number
+    ? {
+        eq?: V;
+        lt?: V;
+        lte?: V;
+        gt?: V;
+        gte?: V;
+        between?: [V, V];
+      }
+    : V extends Date
+      ? {
+          eq?: V;
+          before?: V;
+          after?: V;
+          between?: [V, V];
+        }
+      : {
+          eq?: V;
+        };
 
 /**
  * Filter<T>: for each field of T option to supply FieldFilter

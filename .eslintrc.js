@@ -6,11 +6,11 @@ module.exports = {
     sourceType: 'module'
   },
   plugins: ['@typescript-eslint'],
-  extends: [
-    'eslint:recommended',
-    'plugin:@typescript-eslint/recommended',
-    'prettier'
-  ],
+    extends: [
+  'eslint:recommended',
+  'plugin:@typescript-eslint/recommended',
+  'plugin:prettier/recommended'
+],
   env: { node: true, jest: true, es2021: true },
   rules: {}
 };

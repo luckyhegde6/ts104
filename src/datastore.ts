@@ -1,4 +1,4 @@
-import { Create, Update, Filter, QueryOptions, KeyType } from './types';
+import { Create, Update, Filter, QueryOptions } from './types';
 import { Logger, ConsoleLogger } from './logger';
 type DefaultKey<T> = 'id' extends keyof T ? 'id' : keyof T;
 /**
@@ -7,38 +7,35 @@ type DefaultKey<T> = 'id' extends keyof T ? 'id' : keyof T;
  * - K: primary key name (must be keyof T)
  * - V = T[K] must be acceptable key (string|number|symbol)
  */
-export class DataStore<T extends Record<string, any>, K extends keyof T = DefaultKey<T>> {  private map = new Map<T[K], T>();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export class DataStore<T extends Record<string, any>, K extends keyof T = DefaultKey<T>> {
+  private map = new Map<T[K], T>();
   private logger: Logger;
   private autoIdSeed = 1;
 
-  constructor(private keyName: K, logger?: Logger) {
+  constructor(
+    private keyName: K,
+    logger?: Logger
+  ) {
     this.logger = logger ?? ConsoleLogger;
   }
 
   private generateId(): string {
-    // very simple in-memory id generator
     return `id_${Date.now().toString(36)}_${this.autoIdSeed++}`;
   }
 
   create(item: Create<T, K>): T {
-    // Accept optional key; if missing and key is string -> generate
-    const key = (item as any)[this.keyName] as T[K] | undefined;
-    let finalKey: T[K];
+    const key = item[this.keyName as keyof Create<T, K>] as T[K] | undefined;
 
+    let finalKey: T[K];
     if (key === undefined || key === null) {
-      // Only auto-generate for string keys; otherwise throw.
-      // We keep at runtime a best-effort policy; TypeScript enforces most at compile-time.
-      const sampleKey = ('' as unknown) as T[K];
-      if (typeof sampleKey === 'string' || typeof ('' as any) === 'string') {
-        finalKey = (this.generateId() as unknown) as T[K];
-      } else {
-        throw new Error(`Cannot auto-generate key for non-string primary key. Provide ${String(this.keyName)}.`);
-      }
+      const generated = this.generateId();
+      finalKey = generated as unknown as T[K];
     } else {
       finalKey = key;
     }
 
-    const record = { ...(item as any), [this.keyName]: finalKey } as T;
+    const record: T = { ...(item as unknown as T), [this.keyName]: finalKey } as T;
     if (this.map.has(finalKey)) {
       throw new Error(`Duplicate key: ${String(finalKey)}`);
     }
@@ -55,6 +52,7 @@ export class DataStore<T extends Record<string, any>, K extends keyof T = Defaul
   update(key: T[K], patch: Update<T, K>): T {
     const existing = this.map.get(key);
     if (!existing) throw new Error('NotFound');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updated = { ...existing, ...(patch as any) } as T;
     this.map.set(key, updated);
     this.logger.info('update', { key, patch });
@@ -84,7 +82,9 @@ export class DataStore<T extends Record<string, any>, K extends keyof T = Defaul
   }
 
   query(filter: Filter<T>, options?: QueryOptions<T>): T[] {
-    const matches = Array.from(this.map.values()).filter(item => this.matchesFilter(item, filter));
+    const matches = Array.from(this.map.values()).filter((item) =>
+      this.matchesFilter(item, filter)
+    );
     let result = matches;
     if (options?.sortBy) {
       const dir = options.sortDir === 'desc' ? -1 : 1;
@@ -99,21 +99,24 @@ export class DataStore<T extends Record<string, any>, K extends keyof T = Defaul
     const limit = options?.limit ?? result.length;
     return result.slice(offset, offset + limit);
   }
-
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private matchesFilter(item: T, filter?: any): boolean {
     if (!filter || Object.keys(filter).length === 0) return true;
 
     // Compositional operators first
     if (filter.$and) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (!filter.$and.every((f: any) => this.matchesFilter(item, f))) return false;
     }
     if (filter.$or) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (!filter.$or.some((f: any) => this.matchesFilter(item, f))) return false;
     }
 
     for (const k of Object.keys(filter)) {
       if (k === '$and' || k === '$or') continue;
       const ff = filter[k];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const val = (item as any)[k];
 
       if (ff == null) continue;
@@ -179,13 +182,26 @@ export class DataStore<T extends Record<string, any>, K extends keyof T = Defaul
     this.logger.info('clear');
   }
 }
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export class TransactionalProxy<T extends Record<string, any>, K extends keyof T = DefaultKey<T>> {
   constructor(private ds: DataStore<T, K>) {}
-  create(item: Create<T, K>) { return this.ds.create(item); }
-  get(key: T[K]) { return this.ds.get(key); }
-  update(key: T[K], patch: Update<T, K>) { return this.ds.update(key, patch); }
-  delete(key: T[K]) { return this.ds.delete(key); }
-  list(options?: QueryOptions<T>) { return this.ds.list(options); }
-  query(filter: any, options?: QueryOptions<T>) { return this.ds.query(filter, options); }
+  create(item: Create<T, K>) {
+    return this.ds.create(item);
+  }
+  get(key: T[K]) {
+    return this.ds.get(key);
+  }
+  update(key: T[K], patch: Update<T, K>) {
+    return this.ds.update(key, patch);
+  }
+  delete(key: T[K]) {
+    return this.ds.delete(key);
+  }
+  list(options?: QueryOptions<T>) {
+    return this.ds.list(options);
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  query(filter: any, options?: QueryOptions<T>) {
+    return this.ds.query(filter, options);
+  }
 }
