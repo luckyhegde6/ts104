@@ -3,6 +3,8 @@
 ![build](https://github.com/luckyhegde6/ts104/actions/workflows/ci.yml/badge.svg)
 ![coverage](https://img.shields.io/badge/coverage-90%25-brightgreen)
 
+[![Coverage](coverage/badge.svg)](https://luckyhegde6.github.io/ts104/coverage/)
+
 A lightweight, in-memory, type-safe generic DataStore demonstrating advanced TypeScript features:
 - Generics with constraints
 - Mapped and conditional types

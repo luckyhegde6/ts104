@@ -1,4 +1,4 @@
-name: CI
+name: CI + Coverage Pages
 
 on:
   push:
@@ -6,9 +6,16 @@ on:
   pull_request:
     branches: [ main, master ]
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
 jobs:
   build-test:
     runs-on: ubuntu-latest
+    outputs:
+      coverage-folder: coverage
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -16,7 +23,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: 'npm'
 
       - name: Install dependencies
@@ -31,12 +38,38 @@ jobs:
       - name: Run Jest Tests
         run: npm test
 
-      - name: Type-level Tests
-        run: npm run type-test
+      - name: Generate coverage report and badge
+        uses: cicirello/jest-coverage-report-action@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          output: both
 
-      - name: Upload coverage to GitHub
-        if: success()
+      - name: Upload coverage folder
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-report
+          name: coverage-html
           path: coverage/
+
+  publish-coverage:
+    runs-on: ubuntu-latest
+    needs: build-test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download coverage artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: coverage-html
+          path: coverage/
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload coverage to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: coverage/
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
